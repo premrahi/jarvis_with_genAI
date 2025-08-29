@@ -1,6 +1,9 @@
 from flask import Flask, request
 
-app = Flask(_name_)
+from flask import Flask
+
+app = Flask(__name__)
+
 
 @app.route("/")
 def home():
