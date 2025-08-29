@@ -14,6 +14,6 @@ def run():
     answer = f"You asked: {query}"
     return answer
 
-if if __name__ == "__main__":
+if __name__ == "__main__":
 
     app.run()
