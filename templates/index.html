@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS - AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00d4ff, #0099cc, #0066ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { text-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+            to { text-shadow: 0 0 30px rgba(0, 212, 255, 0.8), 0 0 60px rgba(0, 212, 255, 0.3); }
+        }
+
+        .tagline {
+            color: #a0a0a0;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 30px;
+            min-height: 0;
+        }
+
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+            max-height: 500px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.5);
+            border-radius: 3px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            background: linear-gradient(45deg, #0066ff, #0099cc);
+            margin-left: 60px;
+            text-align: right;
+        }
+
+        .message.assistant {
+            background: rgba(255, 255, 255, 0.1);
+            margin-right: 60px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .message .sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .message-input::placeholder {
+            color: #a0a0a0;
+        }
+
+        .voice-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 300px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+
+        .voice-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #00d4ff;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.05));
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .voice-button.listening {
+            animation: listening 2s ease-in-out infinite;
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        @keyframes listening {
+            0% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 107, 107, 0.8); }
+            100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.5); }
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border-color: rgba(0, 212, 255, 0.5);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .wave-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            animation: wave 2s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes wave {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-right: 60px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00d4ff;
+            animation: typing 1.5s ease-in-out infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.3s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+            30% { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .voice-controls {
+                min-width: auto;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .voice-button {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">J.A.R.V.I.S</h1>
+            <p class="tagline">Just A Rather Very Intelligent System</p>
+        </div>
+
+        <div class="main-content">
+            <div class="chat-section">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message assistant">
+                        <div class="sender">JARVIS</div>
+                        <div>Good day! I'm JARVIS, your AI assistant. How may I help you today?</div>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <div class="input-wrapper">
+                        <input type="text" class="message-input" id="messageInput" placeholder="Ask me anything..." />
+                    </div>
+                    <button class="btn" id="sendBtn">Send</button>
+                </div>
+            </div>
+
+            <div class="voice-controls">
+                <div class="control-panel">
+                    <h3 class="control-title">Voice Control</h3>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span id="statusText">Ready</span>
+                    </div>
+
+                    <div class="voice-button" id="voiceBtn">
+                        <span id="voiceBtnText">🎤 Start</span>
+                        <div class="wave-animation"></div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <button class="btn secondary" id="clearBtn">Clear Chat</button>
+                        <button class="btn secondary" id="settingsBtn">Settings</button>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <h3 class="control-title">Features</h3>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🧠</div>
+                            <div>AI Chat</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🎵</div>
+                            <div>Voice Control</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🌐</div>
+                            <div>Web Search</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">⏰</div>
+                            <div>Tasks</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class JarvisInterface {
+            constructor() {
+                this.isListening = false;
+                this.recognition = null;
+                this.synthesis = window.speechSynthesis;
+                this.chatMessages = document.getElementById('chatMessages');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendBtn = document.getElementById('sendBtn');
+                this.voiceBtn = document.getElementById('voiceBtn');
+                this.clearBtn = document.getElementById('clearBtn');
+                this.statusText = document.getElementById('statusText');
+                this.typingIndicator = document.getElementById('typingIndicator');
+
+                this.initializeEventListeners();
+                this.initializeSpeechRecognition();
+            }
+
+            initializeEventListeners() {
+                this.sendBtn.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+                this.voiceBtn.addEventListener('click', () => this.toggleVoiceRecognition());
+                this.clearBtn.addEventListener('click', () => this.clearChat());
+            }
+
+            initializeSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = false;
+                    this.recognition.interimResults = false;
+                    this.recognition.lang = 'en-US';
+
+                    this.recognition.onstart = () => {
+                        this.isListening = true;
+                        this.updateVoiceButton();
+                        this.statusText.textContent = 'Listening...';
+                    };
+
+                    this.recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        this.messageInput.value = transcript;
+                        this.sendMessage();
+                    };
+
+                    this.recognition.onend = () => {
+                        this.isListening = false;
+                        this.updateVoiceButton();
+                        this.statusText.textContent = 'Ready';
+                    };
+
+                    this.recognition.onerror = (event) => {
+                        this.isListening = false;
+                        this.updateVoiceButton();
+                        this.statusText.textContent = 'Error: ' + event.error;
+                    };
+                } else {
+                    this.statusText.textContent = 'Voice recognition not supported';
+                }
+            }
+
+            toggleVoiceRecognition() {
+                if (!this.recognition) return;
+
+                if (this.isListening) {
+                    this.recognition.stop();
+                } else {
+                    this.recognition.start();
+                }
+            }
+
+            updateVoiceButton() {
+                const voiceBtnText = document.getElementById('voiceBtnText');
+                if (this.isListening) {
+                    this.voiceBtn.classList.add('listening');
+                    voiceBtnText.textContent = '🔴 Stop';
+                } else {
+                    this.voiceBtn.classList.remove('listening');
+                    voiceBtnText.textContent = '🎤 Start';
+                }
+            }
+
+            async sendMessage() {
+    const message = this.messageInput.value.trim();
+    if (!message) return;
+
+    this.addMessage(message, 'user');
+    this.messageInput.value = '';
+    this.showTypingIndicator();
+
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+        this.hideTypingIndicator();
+
+        if (!res.ok || !data.reply) {
+            const err = (data && (data.error || data.detail)) || 'Something went wrong';
+            this.addMessage(`Error: ${err}`, 'assistant');
+            return;
+        }
+        this.addMessage(data.reply, 'assistant');
+    } catch (e) {
+        this.hideTypingIndicator();
+        this.addMessage(`Network error: ${e.message}`, 'assistant');
+    }
+}
+
+
+            addMessage(content, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+
+                const senderDiv = document.createElement('div');
+                senderDiv.className = 'sender';
+                senderDiv.textContent = sender === 'user' ? 'You' : 'JARVIS';
+
+                const contentDiv = document.createElement('div');
+                contentDiv.textContent = content;
+
+                messageDiv.appendChild(senderDiv);
+                messageDiv.appendChild(contentDiv);
+
+                this.chatMessages.appendChild(messageDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+
+                // Text-to-speech for JARVIS responses
+                if (sender === 'assistant' && this.synthesis) {
+                    const utterance = new SpeechSynthesisUtterance(content);
+                    utterance.rate = 1.1;
+                    utterance.pitch = 0.9;
+                    this.synthesis.speak(utterance);
+                }
+            }
+
+            showTypingIndicator() {
+                this.typingIndicator.style.display = 'block';
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            hideTypingIndicator() {
+                this.typingIndicator.style.display = 'none';
+            }
+
+            async simulateAIResponse(userMessage) {
+                // Simulate processing time
+                await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+
+                this.hideTypingIndicator();
+
+                // Simple response logic (replace with actual AI API call)
+                let response = this.generateResponse(userMessage);
+
+                this.addMessage(response, 'assistant');
+            }
+
+            generateResponse(message) {
+                const responses = {
+                    greeting: [
+                        "Hello! I'm JARVIS, at your service.",
+                        "Good day! How may I assist you?",
+                        "Greetings! What can I do for you today?"
+                    ],
+                    time: [
+                        `The current time is ${new Date().toLocaleTimeString()}.`,
+                        `It's ${new Date().toLocaleTimeString()} right now.`
+                    ],
+                    weather: [
+                        "I'd be happy to help with weather information. Please specify your location.",
+                        "For weather updates, I'll need to know your location first."
+                    ],
+                    default: [
+                        "I understand your request. Let me process that for you.",
+                        "That's an interesting question. I'm analyzing the best response.",
+                        "I'm here to help. Could you provide more details about what you need?",
+                        "Processing your request... How else may I assist you?"
+                    ]
+                };
+
+                const lowerMessage = message.toLowerCase();
+
+                if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                    return responses.greeting[Math.floor(Math.random() * responses.greeting.length)];
+                } else if (lowerMessage.includes('time') || lowerMessage.includes('clock')) {
+                    return responses.time[Math.floor(Math.random() * responses.time.length)];
+                } else if (lowerMessage.includes('weather')) {
+                    return responses.weather[Math.floor(Math.random() * responses.weather.length)];
+                } else {
+                    return responses.default[Math.floor(Math.random() * responses.default.length)];
+                }
+            }
+
+            clearChat() {
+                this.chatMessages.innerHTML = `
+                    <div class="message assistant">
+                        <div class="sender">JARVIS</div>
+                        <div>Chat cleared. How may I assist you?</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize the JARVIS interface when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new JarvisInterface();
+        });
+
+        // Add some visual effects
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.querySelector('.cursor');
+            if (!cursor) {
+                const newCursor = document.createElement('div');
+                newCursor.className = 'cursor';
+                newCursor.style.cssText = `
+                    position: fixed;
+                    width: 20px;
+                    height: 20px;
+                    background: radial-gradient(circle, rgba(0,212,255,0.3) 0%, transparent 70%);
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 9999;
+                    transition: all 0.1s ease;
+                `;
+                document.body.appendChild(newCursor);
+            }
+
+            const cursor_element = document.querySelector('.cursor');
+            cursor_element.style.left = e.clientX - 10 + 'px';
+            cursor_element.style.top = e.clientY - 10 + 'px';
+        });
+    </script>
+</body>
+</html>
